@@ -10,9 +10,9 @@ namespace Zip2SD
     public partial class Form1 : Form
     {
         /// <summary>Sizes we allow (2G doesn't work)</summary>
-        string[] Sizes = new string[] { "128M", "256M", "512M", "1G", "4G","8G","16G", "32G", "64G", "128G", "256G", "512G" };
+        public static string[] Sizes = new string[] { "128M", "256M", "512M", "1G", "4G","8G","16G", "32G", "64G", "128G", "256G", "512G" };
         /// <summary>Formats we allow</summary>
-        string[] Formats = new string[] { "--fat12", "--fat16", "--fat32" };
+        public static string[] Formats = new string[] { "--fat12", "--fat16", "--fat32" };
         public Form1()
         {
             InitializeComponent();

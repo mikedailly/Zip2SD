@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Zip2SD": {
+      "commandName": "Project",
+      "commandLineArgs": "-src=\"C:\\source\\ZXSpectrum\\_Demos\\_NEXTROM\\sn-complete-24.11.zip\" -dest=\"C:\\source\\ZXSpectrum\\_Demos\\_NEXTROM\\ZXIMAGE.IMG\" -fat32 -4gb"
+    }
+  }
+}

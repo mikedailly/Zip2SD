@@ -4,9 +4,14 @@
 //
 //  Released under GPL 3.0
 //
+//  hdfmonkey released under GPL 3.0, and source fork available at
+//  https://github.com/mikedailly/hdfmonkey
+//
 // ********************************************************************************************************************
 using System.Diagnostics;
+using System.Drawing;
 using System.IO.Compression;
+using static System.Windows.Forms.DataFormats;
 
 namespace Zip2SD
 {
@@ -52,7 +57,7 @@ namespace Zip2SD
         // ***************************************************************************************************
         static void CopyZip(string _zipPath, string _imgPath)
         {
-            if (MainForm != null)
+            //if (MainForm != null)
             {
                 try
                 {
@@ -62,16 +67,18 @@ namespace Zip2SD
                     // Open the ZIP file
                     using (ZipArchive archive = ZipFile.OpenRead(_zipPath))
                     {
-                        MainForm.progressBar.Maximum = archive.Entries.Count;
-                        MainForm.progressBar.Value = 0;
-                        MainForm.FilelistBox.Items.Clear();
-
+                        if (MainForm != null)
+                        {
+                            MainForm.progressBar.Maximum = archive.Entries.Count;
+                            MainForm.progressBar.Value = 0;
+                            MainForm.FilelistBox.Items.Clear();
+                        }
                         int count = 1;
                         int max_count = 5;
                         // and loop through all files and folders in the file.
                         foreach (ZipArchiveEntry entry in archive.Entries)
                         {
-                            MainForm.progressBar.Value++;
+                            if (MainForm != null) MainForm.progressBar.Value++;
                             DestFilename = entry.FullName;
 
                             // Delete the old file
@@ -97,8 +104,11 @@ namespace Zip2SD
                             }
 
                             // Add extracted files to view
-                            MainForm.FilelistBox.Items.Add(DestFilename);
-                            MainForm.FilelistBox.SelectedIndex = MainForm.FilelistBox.Items.Count - 1;
+                            if (MainForm != null)
+                            {
+                                MainForm.FilelistBox.Items.Add(DestFilename);
+                                MainForm.FilelistBox.SelectedIndex = MainForm.FilelistBox.Items.Count - 1;
+                            }
 
                             count--;
                             if (count <= 0)
@@ -107,7 +117,7 @@ namespace Zip2SD
                                 count = max_count;
                             }
                         }
-                        MainForm.progressBar.Value = 0;
+                        if (MainForm != null) MainForm.progressBar.Value = 0;
                     }
                 }
                 catch (Exception ex)
@@ -139,9 +149,53 @@ namespace Zip2SD
         {
             CreateSDImage(TargetSDImage, SDSize, format, LabelText);
 
+            Console.WriteLine("Building SD Card Image");
             CopyZip(ZipPath, TargetSDImage);
+            Console.WriteLine("Building SD Card Image - Done");
         }
 
+
+        // **************************************************************************************************
+        /// <summary>
+        ///     Automate the building of the SD Card Image
+        /// </summary>
+        /// <param name="_args">Commandline arguments</param>
+        // **************************************************************************************************
+        public static void ParseCommandLine(string[] _args)
+        {
+            //-src="C:\source\ZXSpectrum\_Demos\_NEXTROM\sn-complete-24.11.zip" -dest="C:\source\ZXSpectrum\_Demos\_NEXTROM\ZXIMAGE.IMG" -fat32 -4gb
+            //if ()
+
+            string ZipPath = "";
+            string TargetSDImage = "";
+            string size = Form1.Sizes[4];
+            string fat = Form1.Formats[2];
+            int index = 0;
+            while (index < _args.Length)
+            {
+                string a = _args[index++];
+                if (a.StartsWith("-src=")) 
+                {
+                    ZipPath = a.Substring(5);
+                }
+                else if (a.StartsWith("-dest="))
+                {
+                    TargetSDImage = a.Substring(6);
+                }
+                else if (a=="-fat12") fat = Form1.Formats[0];
+                else if (a=="-fat16") fat = Form1.Formats[1];
+                else if (a=="-fat32") fat = Form1.Formats[2];
+                else if (a=="-1gb") size = Form1.Sizes[3];
+                else if (a=="-2gb") size = Form1.Sizes[4];
+                else if (a=="-4gb") size = Form1.Sizes[4];
+                else if (a == "-8gb") size = Form1.Sizes[5];
+                else if (a == "-16gb") size = Form1.Sizes[6];
+                else if (a == "-32gb") size = Form1.Sizes[7];
+            }
+
+
+            Program.BuildSDCard(ZipPath, TargetSDImage, size, fat, "ZXNext");
+        }
 
         // **************************************************************************************************
         /// <summary>
@@ -149,8 +203,14 @@ namespace Zip2SD
         /// </summary>
         // **************************************************************************************************
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
+            if (args.Length > 0)
+            {
+                ParseCommandLine(args);
+                return;
+            }
+
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
