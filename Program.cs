@@ -18,9 +18,13 @@ namespace Zip2SD
     internal static class Program
     {
         /// <summary>Path+name of hdf monkey exe</summary>
-        public const string HDFMONEY_PATH = "hdfmonkey.exe";
+        public const string HDFMONKEY_PATH = "hdfmonkey.exe";
         /// <summary>Primary form</summary>
         public static Form1? MainForm;
+
+        /// <summary>Path to the "hdfmonkey.exe" - command line can override</summary>
+        public static string HDFMonkeyPath = HDFMONKEY_PATH;
+
 
         // ***************************************************************************************************
         /// <summary>
@@ -39,7 +43,7 @@ namespace Zip2SD
             }
 
             Process hdfmonkey = new Process();
-            hdfmonkey.StartInfo.FileName = HDFMONEY_PATH;
+            hdfmonkey.StartInfo.FileName = HDFMonkeyPath;
             hdfmonkey.StartInfo.Arguments = arguments;
             hdfmonkey.StartInfo.CreateNoWindow = true;
             hdfmonkey.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -174,7 +178,11 @@ namespace Zip2SD
             while (index < _args.Length)
             {
                 string a = _args[index++];
-                if (a.StartsWith("-src=")) 
+                if (a.StartsWith("-exe="))
+                {
+                    HDFMonkeyPath = a.Substring(5);
+                }
+                else if (a.StartsWith("-src=")) 
                 {
                     ZipPath = a.Substring(5);
                 }
